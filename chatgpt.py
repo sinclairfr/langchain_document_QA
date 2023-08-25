@@ -12,10 +12,8 @@ from langchain.llms import OpenAI
 from langchain.vectorstores import Chroma
 
 import constants
-
 os.environ["OPENAI_API_KEY"] = constants.API_KEY
 
-# Enable to save to disk & reuse the model (for repeated queries on the same data)
 PERSIST = True
 
 query = None
@@ -27,7 +25,7 @@ if PERSIST and os.path.exists("persist"):
   vectorstore = Chroma(persist_directory="persist", embedding_function=OpenAIEmbeddings())
   index = VectorStoreIndexWrapper(vectorstore=vectorstore)
 else:
-  #loader = TextLoader("data/data.txt") # Use this line if you only need data.txt
+  #loader = TextLoader("data/data.txt")
   loader = DirectoryLoader("data/")
   if PERSIST:
     index = VectorstoreIndexCreator(vectorstore_kwargs={"persist_directory":"persist"}).from_loaders([loader])
@@ -35,7 +33,7 @@ else:
     index = VectorstoreIndexCreator().from_loaders([loader])
 
 chain = ConversationalRetrievalChain.from_llm(
-  llm=ChatOpenAI(model="gpt-3.5-turbo"),
+  llm=ChatOpenAI(model="gpt-3.5-turbo", temperature=0.1),
   retriever=index.vectorstore.as_retriever(search_kwargs={"k": 1}),
 )
 
